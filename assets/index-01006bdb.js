@@ -984,33 +984,29 @@ let gi = new T();
 
 /* Variables: Top-Level variables defined here are used to hold game state */
 
-
 /* Drawing Functions */
+const dvdImg = new Image();
+dvdImg.src = new URL(""+new URL('DVD-038ef4a7.png', import.meta.url).href+"", self.location).href;
 
 /* Example drawing function: you can add multiple drawing functions
 that will be called in sequence each frame. It's a good idea to do 
 one function per each object you are putting on screen, and you
 may then want to break your drawing function down into sub-functions
 to make it easier to read/follow */
-gi.addDrawing(
-  function ({ ctx, width, height, elapsed, stepTime }) {
-    // Your drawing code here...    
-  }
-);
+gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
+  // draw dvd logo at random position
+  ctx.drawImage(dvdImg, 0, 0, 100, 50);
+});
 
 /* Input Handlers */
 
 /* Example: Mouse click handler (you can change to handle 
 any type of event -- keydown, mousemove, etc) */
 
-gi.addEventListener(
-  "click",
-  function ({ event, x, y }) {
-    // Your click handling code here...
-  }
-);
-
+gi.addEventListener("click", function ({ event, x, y }) {
+  //
+});
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-c293f701.js.map
+//# sourceMappingURL=index-01006bdb.js.map
