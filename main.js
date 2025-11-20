@@ -17,13 +17,21 @@ import { GameInterface } from "simple-canvas-library";
 let gi = new GameInterface();
 
 /* Variables: Top-Level variables defined here are used to hold game state */
-let dvdPosX = 100; // initial X position of DVD logo
-let dvdPosY = 100; // initial Y position of DVD logo
+let dvdPosX = 600;
+let dvdPosY = 300;
+// horizontal velocity in pixels per second (positive = right, negative = left)
+let dvdVelX = 60;
+// vertical velocity in pixels per second (positive = down, negative = up)
+let dvdVelY = 60;
+// width (pixels) we'll draw the logo at. Previously code assumed ~300px, keep same default.
+const DVD_DRAW_WIDTH = 300;
+const DVD_DRAW_HEIGHT = 150;
 /* Drawing Functions */
 // define DVD logo image
-/* used AI to help generate this code, however it still doesnt work so thanks AI */
+/* used AI to help generate this code, however it still doesnt work so thanks AI
+actually upon further review *i* am actually the one that's wrong -Chase */
 const dvdImg = new Image();
-dvdImg.src = '/DVD.png';
+dvdImg.src = "/DVD.png";
 dvdImg.onload = () => {};
 
 /* Example drawing function: you can add multiple drawing functions
@@ -32,18 +40,72 @@ one function per each object you are putting on screen, and you
 may then want to break your drawing function down into sub-functions
 to make it easier to read/follow */
 gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime, canvas }) {
-  if (!dvdImg.complete) return;
-  ctx.drawImage(dvdImg, dvdPosX, dvdPoxY);
+  // Hinkle adjusted code...
+  drawDvd({ ctx });
+  updatePosition({ stepTime, width, height });
+  checkCollisions({ width, height, drawWidth: DVD_DRAW_WIDTH, drawHeight: DVD_DRAW_HEIGHT });
 });
+
+function drawDvd({ ctx }) {
+  const drawWidth = DVD_DRAW_WIDTH;
+  ctx.fillStyle = "red";
+  ctx.beginPath();
+  ctx.arc(dvdPosX, dvdPosY, 20, 0, 2 * Math.PI);
+  ctx.fill();
+  return;
+
+  // Begin generated code (AI-assisted)
+  // Draw the DVD logo at fixed draw width and move using a velocity value
+  
+  // If the image has intrinsic dimensions, compute drawHeight to keep aspect ratio;
+  // otherwise fall back to the constant DVD_DRAW_HEIGHT.
+  const drawHeight = dvdImg.height
+    ? drawWidth
+    : DVD_DRAW_HEIGHT;
+  // Use the simple 5-argument drawImage(image, dx, dy, dWidth, dHeight) overload
+  ctx.drawImage(dvdImg, dvdPosX, dvdPosY, drawWidth, drawHeight);
+}
+
+function updatePosition({ stepTime, width, height }) {
+  // Move by velocity * deltaTime (convert stepTime ms to seconds)
+  const dt = stepTime / 1000;
+  dvdPosX += dvdVelX * dt;
+  dvdPosY += dvdVelY * dt;
+}
+
+function checkCollisions({ width, height, drawWidth, drawHeight }) {
+  // Check for collisions with left/right edges and reverse velocity smoothly
+  if (dvdPosX + drawWidth > width) {
+    // clamp to right edge and reverse direction
+    dvdPosX = width - drawWidth;
+    dvdVelX *= -1;
+  } else if (dvdPosX < 0) {
+    // clamp to left edge and reverse direction
+    dvdPosX = 0;
+    dvdVelX *= -1;
+  }
+  // End generated code (AI-assisted)
+
+  if (dvdPosY + drawHeight > height) {
+    // clamp to bottom edge and reverse direction
+    dvdPosY = height;
+    dvdVelY *= -1;
+  } else if ((dvdPosY < 0)) {
+    // clamp to top edge and reverse direction
+    dvdPosY = 0;
+    dvdVelY *= -1;
+  }
+}
 
 /* Input Handlers */
 
 /* Example: Mouse click handler (you can change to handle 
 any type of event -- keydown, mousemove, etc) */
 
-gi.addEventListener("click", function ({ event, x, y }) {
+/* gi.addHandler("click", function ({ event, x, y }) {
   //we'll work on this later
 });
+*/
 
 /* Run the game */
 gi.run();
