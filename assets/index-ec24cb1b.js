@@ -983,19 +983,22 @@ class T extends p {
 let gi = new T();
 
 /* Variables: Top-Level variables defined here are used to hold game state */
-
+let dvdPosX = 100; // initial X position of DVD logo
 /* Drawing Functions */
+// define DVD logo image
+/* used AI to help generate this code, however it still doesnt work so thanks AI */
 const dvdImg = new Image();
-dvdImg.src = new URL(""+new URL('DVD-038ef4a7.png', import.meta.url).href+"", self.location).href;
+dvdImg.src = '/DVD.png';
+dvdImg.onload = () => {};
 
 /* Example drawing function: you can add multiple drawing functions
 that will be called in sequence each frame. It's a good idea to do 
 one function per each object you are putting on screen, and you
 may then want to break your drawing function down into sub-functions
 to make it easier to read/follow */
-gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
-  // draw dvd logo at random position
-  ctx.drawImage(dvdImg, 0, 0, 100, 50);
+gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime, canvas }) {
+  if (!dvdImg.complete) return;
+  ctx.drawImage(dvdImg, dvdPosX, dvdPoxY);
 });
 
 /* Input Handlers */
@@ -1004,9 +1007,9 @@ gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime }) {
 any type of event -- keydown, mousemove, etc) */
 
 gi.addEventListener("click", function ({ event, x, y }) {
-  //
+  //we'll work on this later
 });
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-01006bdb.js.map
+//# sourceMappingURL=index-ec24cb1b.js.map
