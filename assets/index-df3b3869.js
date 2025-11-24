@@ -983,7 +983,7 @@ class T extends p {
 let gi = new T();
 
 /* Variables: Top-Level variables defined here are used to hold game state */
-let dvdPosX = 300;
+let dvdPosX = 1200;
 let dvdPosY = 300;
 // horizontal velocity in pixels per second (positive = right, negative = left)
 let dvdVelX = 60;
@@ -1030,24 +1030,24 @@ function updatePosition({ stepTime, width, height }) {
 
 function checkCollisions({ width, height, drawWidth, drawHeight }) {
   // Check for collisions with left/right edges and reverse velocity smoothly
-  if (dvdPosX > width) {
+  if (dvdPosX > (width-20)) {
     // clamp to right edge and reverse direction
-    dvdPosX = width;
+    dvdPosX = (width-20);
     dvdVelX *= -1;
-  } else if (dvdPosX < 0) {
+  } else if ((dvdPosX-20) < 0) {
     // clamp to left edge and reverse direction
-    dvdPosX = 0;
+    dvdPosX = 20;
     dvdVelX *= -1;
   }
   // End generated code (AI-assisted)
 
-  if (dvdPosY > height) {
+  if ((dvdPosY+20) > height) {
     // clamp to bottom edge and reverse direction
-    dvdPosY = height;
+    dvdPosY = (height-20);
     dvdVelY *= -1;
-  } else if ((dvdPosY < 0)) {
+  } else if ((dvdPosY-20) < 0) {
     // clamp to top edge and reverse direction
-    dvdPosY = 0;
+    dvdPosY = 20;
     dvdVelY *= -1;
   }
 }
@@ -1064,4 +1064,4 @@ any type of event -- keydown, mousemove, etc) */
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-202c29c7.js.map
+//# sourceMappingURL=index-df3b3869.js.map
