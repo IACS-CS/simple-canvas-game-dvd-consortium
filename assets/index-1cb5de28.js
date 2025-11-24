@@ -1010,11 +1010,7 @@ let blowerPosY = 100;
 let blowerRotation = 0;
 let isBlowing = false;
 
-/* Example drawing function: you can add multiple drawing functions
-that will be called in sequence each frame. It's a good idea to do 
-one function per each object you are putting on screen, and you
-may then want to break your drawing function down into sub-functions
-to make it easier to read/follow */
+/* this is where the main drawing code is. */
 gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime, canvas }) {
   // all this code runs at 60 Hz
   // Hinkle adjusted code...
@@ -1064,7 +1060,6 @@ function updatePosition({ stepTime, width, height }) {
       dvdVelX += Math.cos(angle) * force * dt;
       dvdVelY += Math.sin(angle) * force * dt;
     }
-    
   }
 }
 
@@ -1090,7 +1085,15 @@ function checkCollisions({ width, height, drawWidth, drawHeight }) {
     dvdPosY = 20;
     dvdVelY *= -1;
   }
+  // check for collision with blu-ray logo, if collision then end game
+  const dx = dvdPosX - bluPosX;
+  const dy = dvdPosY - bluPosY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  if (distance < 40) {
+    alert("Lost");
+  }
 }
+
 function drawLeafBlower({ ctx, width, height, elapsed, stepTime, canvas }) {
   // compute angle toward the DVD logo and store it on the blower
   // atan2(dy, dx) gives angle from blower -> dvd
@@ -1113,8 +1116,8 @@ function drawLeafBlower({ ctx, width, height, elapsed, stepTime, canvas }) {
   ctx.restore();
   // end gpt-generated code
 }
-// removed unused leafBlowerRotation() helper (rotation stored in `blowerRotation`)
 /* Input Handlers */
+
 // mouse move handler, has leafblower follow mouse position
 gi.addHandler("mousemove", function ({ x, y }) {
   //update leaf blower position
@@ -1122,13 +1125,16 @@ gi.addHandler("mousemove", function ({ x, y }) {
   blowerPosY = y;
 });
 
+// this fucntion tests if the left mouse button is pressed
 gi.addHandler("mousedown", function ({ event, x, y }) {
 isBlowing = true;
 });
+
+// this function runs if the left mouse button is released
 gi.addHandler("mouseup", function ({ event, x, y }) {
 isBlowing = false;
 });
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-2a123bb8.js.map
+//# sourceMappingURL=index-1cb5de28.js.map
