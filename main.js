@@ -17,7 +17,7 @@ import { GameInterface } from "simple-canvas-library";
 let gi = new GameInterface();
 
 /* Variables: Top-Level variables defined here are used to hold game state */
-let dvdPosX = 600;
+let dvdPosX = 300;
 let dvdPosY = 300;
 // horizontal velocity in pixels per second (positive = right, negative = left)
 let dvdVelX = 60;
@@ -33,6 +33,9 @@ actually upon further review *i* am actually the one that's wrong -Chase */
 const dvdImg = new Image();
 dvdImg.src = "/DVD.png";
 dvdImg.onload = () => {};
+// blu-ray logo position
+let bluPosX = 100;
+let bluPosY = 100;
 
 /* Example drawing function: you can add multiple drawing functions
 that will be called in sequence each frame. It's a good idea to do 
@@ -40,6 +43,7 @@ one function per each object you are putting on screen, and you
 may then want to break your drawing function down into sub-functions
 to make it easier to read/follow */
 gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime, canvas }) {
+  // all this code runs at 60 Hz
   // Hinkle adjusted code...
   drawDvd({ ctx });
   updatePosition({ stepTime, width, height });
@@ -75,9 +79,9 @@ function updatePosition({ stepTime, width, height }) {
 
 function checkCollisions({ width, height, drawWidth, drawHeight }) {
   // Check for collisions with left/right edges and reverse velocity smoothly
-  if (dvdPosX + drawWidth > width) {
+  if (dvdPosX > width) {
     // clamp to right edge and reverse direction
-    dvdPosX = width - drawWidth;
+    dvdPosX = width;
     dvdVelX *= -1;
   } else if (dvdPosX < 0) {
     // clamp to left edge and reverse direction
@@ -86,7 +90,7 @@ function checkCollisions({ width, height, drawWidth, drawHeight }) {
   }
   // End generated code (AI-assisted)
 
-  if (dvdPosY + drawHeight > height) {
+  if (dvdPosY > height) {
     // clamp to bottom edge and reverse direction
     dvdPosY = height;
     dvdVelY *= -1;
