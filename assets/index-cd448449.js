@@ -999,6 +999,9 @@ actually upon further review *i* am actually the one that's wrong -Chase */
 const dvdImg = new Image();
 dvdImg.src = "/DVD.png";
 dvdImg.onload = () => {};
+// leaf blower position
+let blowerPosX = 100;
+let blowerPosY = 100;
 
 /* Example drawing function: you can add multiple drawing functions
 that will be called in sequence each frame. It's a good idea to do 
@@ -1011,6 +1014,7 @@ gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime, canvas }) {
   drawDvd({ ctx });
   updatePosition({ stepTime, width, height });
   checkCollisions({ width, height, drawWidth: DVD_DRAW_WIDTH, drawHeight: DVD_DRAW_HEIGHT });
+  drawLeafBlower({ ctx, width, height, elapsed, stepTime, canvas });
 });
 
 function drawDvd({ ctx }) {
@@ -1051,8 +1055,18 @@ function checkCollisions({ width, height, drawWidth, drawHeight }) {
     dvdVelY *= -1;
   }
 }
-
+function drawLeafBlower({ ctx, width, height, elapsed, stepTime, canvas }) {
+  // draw leaf blower as a stick for now
+  ctx.fillStyle = "white";
+  ctx.fillRect(blowerPosX - 5, blowerPosY - 20, 5, 30);
+}
 /* Input Handlers */
+// mouse move handler, has leafblower follow mouse position
+gi.addHandler("mousemove", function ({ x, y }) {
+  //update leaf blower position
+  blowerPosX = x;
+  blowerPosY = y;
+});
 
 /* Example: Mouse click handler (you can change to handle 
 any type of event -- keydown, mousemove, etc) */
@@ -1064,4 +1078,4 @@ any type of event -- keydown, mousemove, etc) */
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-df3b3869.js.map
+//# sourceMappingURL=index-cd448449.js.map
