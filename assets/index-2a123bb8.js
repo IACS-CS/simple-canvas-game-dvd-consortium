@@ -999,9 +999,16 @@ actually upon further review *i* am actually the one that's wrong -Chase */
 const dvdImg = new Image();
 dvdImg.src = "/DVD.png";
 dvdImg.onload = () => {};
+// blu-ray logo position
+let bluPosX = 0;
+let bluPosY = 0;
+let bluDrawTime = -1;
 // leaf blower position
 let blowerPosX = 100;
 let blowerPosY = 100;
+// leaf blower rotation (radians) - 0 = facing +X
+let blowerRotation = 0;
+let isBlowing = false;
 
 /* Example drawing function: you can add multiple drawing functions
 that will be called in sequence each frame. It's a good idea to do 
@@ -1015,6 +1022,7 @@ gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime, canvas }) {
   updatePosition({ stepTime, width, height });
   checkCollisions({ width, height, drawWidth: DVD_DRAW_WIDTH, drawHeight: DVD_DRAW_HEIGHT });
   drawLeafBlower({ ctx, width, height, elapsed, stepTime, canvas });
+  drawBluRay({ ctx, stepTime, width, height, elapsed});
 });
 
 function drawDvd({ ctx }) {
@@ -1025,11 +1033,39 @@ function drawDvd({ ctx }) {
   return;
 }
 
+function drawBluRay({ ctx, stepTime, width, height, elapsed}) {
+  // Draw a simple blue circle for the Blu-ray logo
+  let drawCount = Math.floor(elapsed / 10000);
+  if (drawCount > bluDrawTime) {
+    console.log("Moving blu-ray logo");
+    bluPosX = Math.random() * (width - 20);
+    bluPosY = Math.random() * (height - 20);
+    bluDrawTime = drawCount;
+  }
+  ctx.fillStyle = "blue";
+  ctx.beginPath();
+  ctx.arc(bluPosX, bluPosY, 20, 0, 2 * Math.PI);
+  ctx.fill();
+}
+
 function updatePosition({ stepTime, width, height }) {
   // Move by velocity * deltaTime (convert stepTime ms to seconds)
   const dt = stepTime / 1000;
   dvdPosX += dvdVelX * dt;
   dvdPosY += dvdVelY * dt;
+  if (isBlowing) {
+    // add dvd velocity away from blower, scaled by distance
+    const dx = dvdPosX - blowerPosX;
+    const dy = dvdPosY - blowerPosY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance < 200) { // only affect if within 200 pixels
+      const force = (200 - distance) / 200 * 300; // max force of 300 pixels/sec^2
+      const angle = Math.atan2(dy, dx);
+      dvdVelX += Math.cos(angle) * force * dt;
+      dvdVelY += Math.sin(angle) * force * dt;
+    }
+    
+  }
 }
 
 function checkCollisions({ width, height, drawWidth, drawHeight }) {
@@ -1056,10 +1092,28 @@ function checkCollisions({ width, height, drawWidth, drawHeight }) {
   }
 }
 function drawLeafBlower({ ctx, width, height, elapsed, stepTime, canvas }) {
-  // draw leaf blower as a stick for now
+  // compute angle toward the DVD logo and store it on the blower
+  // atan2(dy, dx) gives angle from blower -> dvd
+  const angle = Math.atan2(dvdPosY - blowerPosY, dvdPosX - blowerPosX);
+  blowerRotation = angle;
+
+  // draw the leaf blower using canvas transforms so it points at the DVD
+  ctx.save();
+  ctx.translate(blowerPosX, blowerPosY);
+  ctx.rotate(blowerRotation);
+
+  // nozzle (points to the right at angle 0)
   ctx.fillStyle = "white";
-  ctx.fillRect(blowerPosX - 5, blowerPosY - 20, 5, 30);
+  ctx.fillRect(0, -6, 36, 12);
+
+  // handle behind the nozzle
+  ctx.fillStyle = "white";
+  ctx.fillRect(-10, -2, 10, 4);
+
+  ctx.restore();
+  // end gpt-generated code
 }
+// removed unused leafBlowerRotation() helper (rotation stored in `blowerRotation`)
 /* Input Handlers */
 // mouse move handler, has leafblower follow mouse position
 gi.addHandler("mousemove", function ({ x, y }) {
@@ -1068,14 +1122,13 @@ gi.addHandler("mousemove", function ({ x, y }) {
   blowerPosY = y;
 });
 
-/* Example: Mouse click handler (you can change to handle 
-any type of event -- keydown, mousemove, etc) */
-
-/* gi.addHandler("click", function ({ event, x, y }) {
-  //we'll work on this later
+gi.addHandler("mousedown", function ({ event, x, y }) {
+isBlowing = true;
 });
-*/
+gi.addHandler("mouseup", function ({ event, x, y }) {
+isBlowing = false;
+});
 
 /* Run the game */
 gi.run();
-//# sourceMappingURL=index-cd448449.js.map
+//# sourceMappingURL=index-2a123bb8.js.map
