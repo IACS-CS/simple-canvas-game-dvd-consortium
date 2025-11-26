@@ -34,15 +34,20 @@ const dvdImg = new Image();
 dvdImg.src = "/DVD.png";
 dvdImg.onload = () => {};
 // blu-ray logo position
-let bluPosX = 0
-let bluPosY = 0
+let bluPosX = 0;
+let bluPosY = 0;
 let bluDrawTime = -1;
+//blu-ray radius value
+let bluRadius = 60;
 // leaf blower position
 let blowerPosX = 100;
 let blowerPosY = 100;
 // leaf blower rotation (radians) - 0 = facing +X
 let blowerRotation = 0;
-let isBlowing = false
+let isBlowing = false;
+//scorecount
+let scorecount = 0;
+let inCorner = false;
 
 /* this is where the main drawing code is. */
 gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime, canvas }) {
@@ -50,9 +55,15 @@ gi.addDrawing(function ({ ctx, width, height, elapsed, stepTime, canvas }) {
   // Hinkle adjusted code...
   drawDvd({ ctx });
   updatePosition({ stepTime, width, height });
-  checkCollisions({ width, height, drawWidth: DVD_DRAW_WIDTH, drawHeight: DVD_DRAW_HEIGHT });
+  checkCollisions({
+    width,
+    height,
+    drawWidth: DVD_DRAW_WIDTH,
+    drawHeight: DVD_DRAW_HEIGHT,
+  });
   drawLeafBlower({ ctx, width, height, elapsed, stepTime, canvas });
-  drawBluRay({ ctx, stepTime, width, height, elapsed});
+  drawBluRay({ ctx, stepTime, width, height, elapsed });
+  drawScore({ ctx });
 });
 
 function drawDvd({ ctx }) {
@@ -65,28 +76,26 @@ function drawDvd({ ctx }) {
 
   // Begin generated code (AI-assisted)
   // Draw the DVD logo at fixed draw width and move using a velocity value
-  
+
   // If the image has intrinsic dimensions, compute drawHeight to keep aspect ratio;
   // otherwise fall back to the constant DVD_DRAW_HEIGHT.
-  const drawHeight = dvdImg.height
-    ? drawWidth
-    : DVD_DRAW_HEIGHT;
+  const drawHeight = dvdImg.height ? drawWidth : DVD_DRAW_HEIGHT;
   // Use the simple 5-argument drawImage(image, dx, dy, dWidth, dHeight) overload
   ctx.drawImage(dvdImg, dvdPosX, dvdPosY, drawWidth, drawHeight);
 }
 
-function drawBluRay({ ctx, stepTime, width, height, elapsed}) {
+function drawBluRay({ ctx, stepTime, width, height, elapsed }) {
   // Draw a simple blue circle for the Blu-ray logo
   let drawCount = Math.floor(elapsed / 10000);
   if (drawCount > bluDrawTime) {
     console.log("Moving blu-ray logo");
-    bluPosX = Math.random() * (width - 20)
-    bluPosY = Math.random() * (height - 20)
+    bluPosX = Math.random() * (width - 20);
+    bluPosY = Math.random() * (height - 20);
     bluDrawTime = drawCount;
   }
   ctx.fillStyle = "blue";
   ctx.beginPath();
-  ctx.arc(bluPosX, bluPosY, 20, 0, 2 * Math.PI);
+  ctx.arc(bluPosX, bluPosY, bluRadius, 0, 2 * Math.PI);
   ctx.fill();
 }
 
@@ -100,8 +109,9 @@ function updatePosition({ stepTime, width, height }) {
     const dx = dvdPosX - blowerPosX;
     const dy = dvdPosY - blowerPosY;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < 200) { // only affect if within 200 pixels
-      const force = (200 - distance) / 200 * 300; // max force of 300 pixels/sec^2
+    if (distance < 200) {
+      // only affect if within 200 pixels
+      const force = ((200 - distance) / 200) * 300; // max force of 300 pixels/sec^2
       const angle = Math.atan2(dy, dx);
       dvdVelX += Math.cos(angle) * force * dt;
       dvdVelY += Math.sin(angle) * force * dt;
@@ -109,24 +119,24 @@ function updatePosition({ stepTime, width, height }) {
   }
 }
 
-function checkCollisions({ width, height, drawWidth, drawHeight }) {
+function checkCollisions({ width, height, drawWidth, drawHeight, elapsed }) {
   // Check for collisions with left/right edges and reverse velocity smoothly
-  if (dvdPosX > (width-20)) {
+  if (dvdPosX > width - 20) {
     // clamp to right edge and reverse direction
-    dvdPosX = (width-20);
+    dvdPosX = width - 20;
     dvdVelX *= -1;
-  } else if ((dvdPosX-20) < 0) {
+  } else if (dvdPosX - 20 < 0) {
     // clamp to left edge and reverse direction
     dvdPosX = 20;
     dvdVelX *= -1;
   }
   // End generated code (AI-assisted)
 
-  if ((dvdPosY+20) > height) {
+  if (dvdPosY + 20 > height) {
     // clamp to bottom edge and reverse direction
-    dvdPosY = (height-20);
+    dvdPosY = height - 20;
     dvdVelY *= -1;
-  } else if ((dvdPosY-20) < 0) {
+  } else if (dvdPosY - 20 < 0) {
     // clamp to top edge and reverse direction
     dvdPosY = 20;
     dvdVelY *= -1;
@@ -135,9 +145,34 @@ function checkCollisions({ width, height, drawWidth, drawHeight }) {
   const dx = dvdPosX - bluPosX;
   const dy = dvdPosY - bluPosY;
   const distance = Math.sqrt(dx * dx + dy * dy);
-  if (distance < 40) {
-    alert("Lost");
+  if (distance < 20 + bluRadius) {
+    alert("You Lose! What a bum.");
+    scorecount = 0;
+    bluRadius = 60;
+    // reset dvd position and velocity
+    dvdPosX = 1200;
+    dvdPosY = 300;
+    dvdVelX = 60;
+    dvdVelY = 60;
   }
+  //if dvd position hits corner of canvas, increase scorecount by 1
+  //only update score when the score delay is reached
+  if (
+    (dvdPosX >= width - 50 && dvdPosY >= height - 50) ||
+    (dvdPosX <= 50 && dvdPosY <= 50) ||
+    (dvdPosX >= width - 50 && dvdPosY <= 50) ||
+    (dvdPosX <= 50 && dvdPosY >= height - 50)
+  ) {
+    // if it is the first time player is in corner, than increment score by 1
+    if (!inCorner) {
+      scorecount += 1;
+      bluRadius +=10
+    }
+    inCorner = true;
+  } else {
+    //player has left corner, so player can score again
+      inCorner = false 
+    }
 }
 
 function drawLeafBlower({ ctx, width, height, elapsed, stepTime, canvas }) {
@@ -168,7 +203,7 @@ function drawScore({ ctx }) {
   ctx.fillStyle = "white";
   ctx.font = "24px Arial";
   ctx.textAlign = "center";
-  ctx.fillText("score: 0", ctx.canvas.width / 2, 30,);
+  ctx.fillText("score" && scorecount, ctx.canvas.width / 2, 30);
 }
 /* Input Handlers */
 
@@ -181,12 +216,12 @@ gi.addHandler("mousemove", function ({ x, y }) {
 
 // this fucntion tests if the left mouse button is pressed
 gi.addHandler("mousedown", function ({ event, x, y }) {
-isBlowing = true
+  isBlowing = true;
 });
 
 // this function runs if the left mouse button is released
 gi.addHandler("mouseup", function ({ event, x, y }) {
-isBlowing = false
+  isBlowing = false;
 });
 
 /* Run the game */
